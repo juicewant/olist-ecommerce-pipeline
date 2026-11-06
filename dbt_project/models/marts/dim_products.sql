@@ -1,0 +1,12 @@
+select
+    p.product_id,
+    coalesce(t.category_name_en, p.category_name_pt, 'unknown') as category_name,
+    p.category_name_pt,
+    p.weight_g,
+    p.length_cm,
+    p.height_cm,
+    p.width_cm,
+    p.photos_qty
+from {{ ref('stg_olist__products') }} p
+left join {{ ref('stg_olist__category_translation') }} t
+    on t.category_name_pt = p.category_name_pt
