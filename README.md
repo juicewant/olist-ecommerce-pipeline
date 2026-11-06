@@ -42,6 +42,18 @@ Star schema with one fact table at the order-item grain:
 - **Fact:** `fct_order_items` — revenue in BRL and USD, delivery days, late flag, review score
 - **Dimensions:** `dim_customers` (one row per real person, not per order), `dim_products`, `dim_sellers`, `dim_date`
 
+## Project structure
+```
+├── ingestion/ingest.py        # Extract (Kaggle CSVs + FX API) and load into DuckDB raw schema
+├── dbt_project/
+│   ├── models/staging/        # Clean and type the raw tables
+│   ├── models/intermediate/   # Date spine, FX forward-fill
+│   └── models/marts/          # Star schema (facts, dimensions) with tests
+├── sql/dashboard_queries.sql  # Queries behind the Metabase charts
+├── docs/images/               # Dashboard and lineage screenshots
+└── docker-compose.yml         # Metabase with the DuckDB driver
+```
+
 ## Engineering highlights
 - **Raw data stays untouched.** Raw tables are loaded as text with a `_loaded_at` audit column; typing and cleaning happen in dbt. The ingestion script is idempotent.
 - **Data quality tests** (uniqueness, not-null, accepted values, foreign-key relationships) caught a real issue: duplicate FX dates caused by API chunk boundaries. It was fixed in staging without touching raw data.
